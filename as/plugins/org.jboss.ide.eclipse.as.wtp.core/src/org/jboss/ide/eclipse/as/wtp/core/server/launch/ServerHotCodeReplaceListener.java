@@ -92,7 +92,7 @@ public class ServerHotCodeReplaceListener implements IJavaHotCodeReplaceListener
 			}
 		}
 		if (behavior == RESTART_MODULE) {
-			restartModules();
+			restartModules(target);
 		} else if (behavior == RESTART_SERVER) {
 			restartServer();
 		} else if (behavior == TERMINATE) {
@@ -101,13 +101,13 @@ public class ServerHotCodeReplaceListener implements IJavaHotCodeReplaceListener
 		// Continue means ignore
 	}
 
-	protected void restartModules() {
+	protected void restartModules(final IJavaDebugTarget target) {
 
 		final IModule[] modules = server.getModules();
 		IServer.IOperationListener listener = new IServer.IOperationListener() {
 
 			public void done(IStatus result) {
-				postPublish(modules);
+				postPublish(target, modules);
 			}
 		};
 		server.publish(IServer.PUBLISH_FULL, Collections.singletonList(modules), null, listener);
@@ -115,9 +115,10 @@ public class ServerHotCodeReplaceListener implements IJavaHotCodeReplaceListener
 
 	/**
 	 * Subclasses can override
+	 * @param target 
 	 * @param modules
 	 */
-	protected void postPublish(IModule[] modules) {
+	protected void postPublish(IJavaDebugTarget target, IModule[] modules) {
 	}
 	
 	/**
