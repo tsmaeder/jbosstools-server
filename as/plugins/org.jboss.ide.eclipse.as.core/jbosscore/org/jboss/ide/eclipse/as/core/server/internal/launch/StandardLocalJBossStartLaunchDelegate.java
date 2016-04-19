@@ -18,8 +18,13 @@ import javax.management.MBeanServerConnection;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
+import org.eclipse.debug.core.model.IBreakpoint;
+import org.eclipse.debug.internal.core.BreakpointManager;
+import org.eclipse.jdt.debug.core.IJavaDebugTarget;
 import org.eclipse.jdt.debug.core.IJavaHotCodeReplaceListener;
+import org.eclipse.jdt.debug.core.JDIDebugModel;
 import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.wst.server.core.IModule;
@@ -131,15 +136,31 @@ public class StandardLocalJBossStartLaunchDelegate extends
 	protected IJavaHotCodeReplaceListener getHotCodeReplaceListener(final IServer server, ILaunch launch) {
 		if( addCustomHotcodeReplaceLogic(server)) {
 			return new ServerHotCodeReplaceListener(server, launch) {
-				protected void postPublish(IModule[] modules) {
+				protected void postPublish(IJavaDebugTarget target, IModule[] modules) {
 					waitModulesStarted(modules);
+					removeBreakpoints(target);
 					executeJMXGarbageCollection(server, modules);
+					addBreakpoints(target);
 				}
 			};
 		}
 		return null;
 	}
 	
+	protected void addBreakpoints(IJavaDebugTarget target) {
+		IBreakpoint[] breakpoints = DebugPlugin.getDefault().getBreakpointManager().getBreakpoints();
+		for (int i = 0; i < breakpoints.length; i++) {
+			target.breakpointAdded(breakpoints[i]);
+		}
+	}
+
+	protected void removeBreakpoints(IJavaDebugTarget target) {
+		IBreakpoint[] breakpoints = DebugPlugin.getDefault().getBreakpointManager().getBreakpoints();
+		for (int i = 0; i < breakpoints.length; i++) {
+			target.breakpointRemoved(breakpoints[i], null);
+		}
+	}
+
 	protected void executeJMXGarbageCollection(IServer server, IModule[] modules) {
 		IJBossServer jbs = (IJBossServer) server.loadAdapter(IJBossServer.class, null);
 		if (jbs instanceof IConnectionFacade) {
