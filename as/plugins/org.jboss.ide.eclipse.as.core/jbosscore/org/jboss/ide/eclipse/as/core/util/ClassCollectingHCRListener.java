@@ -26,7 +26,9 @@ public final class ClassCollectingHCRListener extends ServerHotCodeReplaceListen
 		super(server, launch);
 	}
 
-	protected void postPublish(IJavaDebugTarget target, IServer server, IModule[] modules) {
+	@Override
+	protected void postPublish(IJavaDebugTarget target, IModule[] modules) {
+		IServer server = getServer();
 		waitModulesStarted(modules);
 		removeBreakpoints(target);
 		executeJMXGarbageCollection(server, modules);
