@@ -66,11 +66,20 @@ public class ServerHotCodeReplaceListener implements IJavaHotCodeReplaceListener
 	public static final int TERMINATE = 4;
 
 	private IServer server;
-
+	private ILaunch launch;
 	public ServerHotCodeReplaceListener(IServer server, ILaunch launch) {
 		this.server = server;
+		this.launch = launch;
 	}
 
+	protected IServer getServer() {
+		return server;
+	}
+	
+	protected ILaunch getLaunch() {
+		return launch;
+	}
+	
 	public void hotCodeReplaceSucceeded(IJavaDebugTarget arg0) {
 		// ignore
 	}
@@ -107,7 +116,7 @@ public class ServerHotCodeReplaceListener implements IJavaHotCodeReplaceListener
 		IServer.IOperationListener listener = new IServer.IOperationListener() {
 
 			public void done(IStatus result) {
-				postPublish(target, server, modules);
+				postPublish(target, modules);
 			}
 		};
 		server.publish(IServer.PUBLISH_FULL, Collections.singletonList(modules), null, listener);
@@ -119,7 +128,7 @@ public class ServerHotCodeReplaceListener implements IJavaHotCodeReplaceListener
 	 * @param server
 	 * @param modules
 	 */
-	protected void postPublish(IJavaDebugTarget target, IServer server, IModule[] modules) {
+	protected void postPublish(IJavaDebugTarget target, IModule[] modules) {
 	}
 	
 	/**
